@@ -1,7 +1,7 @@
 // R. Conner Howell
 // Polygons 2016
-// Purpose: Mostly and art project.
-// Goal: Generate a bunch of polygons and create some cool art
+// Purpose: Mostly an art project.
+// Goal: Generate a bunch of polygons and create some cool art.
 
 
 // Required to use the SVG library
@@ -105,9 +105,9 @@ class Box {
     let top = new Polygon(p6, p7, p5, p1);
 
     // Draw them with SVG.js
-    this.left = svg.polygon(left.getPoints()).fill('black').stroke({width: 1});
-    this.right = svg.polygon(right.getPoints()).fill('transparent').stroke({width: 1});
-    this.top = svg.polygon(top.getPoints()).fill('transparent').stroke({width: 1});
+    this.left = svg.polygon(left.getPoints()).fill("#000");
+    this.right = svg.polygon(right.getPoints()).fill("#444");
+    this.top = svg.polygon(top.getPoints()).fill("#EEE");
   }
   changeColor(palette: string[]) {
     this.left.fill(palette[0]);
@@ -116,8 +116,16 @@ class Box {
   }
 }
 
-// Constant variable
-let COLUMNS = 15;
+// Prompt user for column input
+let column_string: string = prompt("Enter number of columns\nClick once generated\nRange: [5, 40]\n", "20");
+let COLUMNS: number = parseInt(column_string, 10);
+// Input validation
+while (isNaN(COLUMNS) || (parseInt(column_string, 10) < 5 || parseInt(column_string, 10) > 40)) {
+  column_string = prompt("NOT IN RANGE\nEnter number of columns\nRange: [5, 40]\n", "20");
+  COLUMNS = parseInt(column_string, 10)
+}
+
+
 
 // Scale is the width over (2 * columns) because the boxes extend in the +x and -x direction by 2 * scale
 let scale = window.innerWidth / COLUMNS;
@@ -133,6 +141,9 @@ for (let i = 0; i < COLUMNS; i++) {
     }
   }
 }
+
+// Finished Adding boxes
+document.getElementById('loading').remove();
 
 // Initialize color palette
 let palette = new Palette();
