@@ -105,12 +105,8 @@ var scale = window.innerWidth / COLUMNS;
 var boxes = [];
 for (var i = 0; i < COLUMNS; i++) {
     for (var j = 0; j < COLUMNS + 1; j++) {
-        if (i % 2 == 0) {
-            boxes[boxes.length] = new Box(svg, j * scale, i * (scale - (scale / 4)), scale);
-        }
-        else {
-            boxes[boxes.length] = new Box(svg, j * scale + (scale / 2), i * (scale - (scale / 4)), scale);
-        }
+        var shift = (i % 2 == 0) ? 0 : (scale / 2);
+        boxes.push(new Box(svg, j * scale + shift, i * (scale - (scale / 4)), scale));
     }
 }
 // Finished Adding boxes

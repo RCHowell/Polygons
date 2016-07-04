@@ -125,20 +125,14 @@ while (isNaN(COLUMNS) || (parseInt(column_string, 10) < 5 || parseInt(column_str
   COLUMNS = parseInt(column_string, 10)
 }
 
-
-
-// Scale is the width over (2 * columns) because the boxes extend in the +x and -x direction by 2 * scale
 let scale = window.innerWidth / COLUMNS;
-
 let boxes: Array<Box> = [];
 
 for (let i = 0; i < COLUMNS; i++) {
   for (let j = 0; j < COLUMNS + 1; j++) {
-    if (i % 2 == 0) {
-      boxes[boxes.length] = new Box(svg, j * scale, i * (scale - (scale  / 4)), scale);
-    } else {
-      boxes[boxes.length] = new Box(svg, j * scale + (scale  / 2), i * (scale - (scale  / 4)), scale);
-    }
+    // shift row every other column
+    let shift = (i % 2 == 0) ? 0 : (scale / 2);
+    boxes.push(new Box(svg, j * scale + shift, i * (scale - (scale  / 4)), scale));
   }
 }
 
