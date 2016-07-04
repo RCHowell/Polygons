@@ -1,5 +1,6 @@
 # Polygons
 Typescript and SVG experiment
+
 This project divides the browser window into hundreds of polygons that form the classic 3D Cube illusion
 
 - You can download and and just open index.html and it will run.
