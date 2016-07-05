@@ -1,7 +1,7 @@
 // R. Conner Howell
-// Polygons 2016
-// Purpose: Mostly an art project.
-// Goal: Generate a bunch of polygons and create some cool art.
+// Perspective 2016
+// Purpose: Art project, Typescript Practice
+// Goal: Generate polygons with two vanish points and a center of perspective for 3D
 
 
 // Required to use the SVG library
@@ -29,7 +29,7 @@ class Palette {
   constructor() {
     this.randomize();
   }
-  randomize() {
+  randomize(): void {
     // Randomize which color array is the list
     let len = Palette.lists.length;
     let val = Math.floor(Math.random() * len) % len;
@@ -44,109 +44,249 @@ class Palette {
 // Point class so that 'number' types can be kept
 // The SVG.js library deals with strings, and I would prefer to have 'number' types stored
 class Point {
-  private x: number;
-  private y: number;
+  public x: number;
+  public y: number;
+
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
   }
-  // toString exists for use in rendering the polygon with SVG.js
+  // toString exists for rendering the polygon with SVG.js
+  // SVG.js requires points represented in a string with format: "x1,y1 x2,y2 ...."
   toString(): string {
     return `${this.x},${this.y}`;
   }
 }
 
-// Polygon class to be used for generating all screen content
-class Polygon {
-
-  // It has points a,b,c,d
-  // a ----- b
-  // |      |
-  // d ----- c
-  // Polygons are limited to 4 points for this project
+// Shape class is used for easier creation with SVG.js
+// This way I can say new Polygon(a).addPoint(p)... instead of svg.polygon("x1,y1,x2,y2,..,x4,y4");
+class Shape {
+  // Depending on how many points it has, it will be a point, line, or polygon
 
   // String containing all points in the format "a b c d" where a = "x,y" etc.
-  private points: string;
-  constructor(public a: Point, public b: Point, public c: Point, public d: Point) {
+  private points: Point[];
+  private point_string: string;
+  public graphic: any;
+
+  constructor(public point: Point) {
     // Points are represented by a string "a,b"
     // Turn point objects into a string recognizable by SVG.js
-    this.points = `${a.toString()} ${b.toString()} ${c.toString()} ${d.toString()}`;
+    this.points = [point];
+
+    // Shape starts as a point (represented with a small circle)
+    this.graphic = svg.circle(5).attr({
+      cx: point.x,
+      cy: point.y,
+      fill: "#000"
+    });
   }
-  getPoints(): string {
-    return this.points;
+
+  // This method draws the polygon as if the point were there
+  renderWithPoint(x: number, y: number): void {
+    if (this.graphic) this.graphic.remove();
+    switch (this.points.length + 1) {
+      case 0:
+      case 1: break;
+      case 2: this.renderLine(x, y); break;
+      default: this.renderPolygon(x, y); break;
+    }
+  }
+
+  renderLine(x: number, y: number): void {
+    this.graphic = svg.line(`${this.points[0].toString()}, ${x},${y}`).stroke({ width: 1 });
+  }
+
+  renderPolygon(x: number, y: number): void {
+    this.makePointString();
+    this.point_string += `${x},${y}`;
+    this.graphic = svg.polygon(this.point_string).stroke({ width: 1 });
+  }
+
+  addPoint(point: Point): void {
+    this.points.push(point);
+  }
+
+  makePointString(): void {
+    this.point_string = "";
+    for (let p of this.points) {
+      this.point_string += p.toString() + " ";
+    }
+  }
+
+  fixPersective(center: number): void {
+    // Order br = bottom right | bl = bottom left | tl = top left | tr = top right
+    let points = this.determinePoints();
+
+    if (this.points[0].x < center) {
+      this.vanishToLeft(points, center);
+    } else {
+      this.vanishToRight(points, center);
+    }
+
+    this.makePointString();
+    this.graphic.remove();
+    this.graphic = svg.polygon(this.point_string).stroke({ width: 1 });
+  }
+
+  vanishToLeft(p: Point[], center: number): void {
+    let baseX = -1 * window.innerWidth;
+    let baseY = window.innerHeight;
+
+    p[3].x = p[0].x; // set top_right.x = bottom_right.x
+    p[2].x = p[1].x; // set top_left.x = bottom_left.x
+
+    let y_low = window.innerHeight - p[0].y; // height from bottom to bottom_right
+    let y_high = window.innerHeight - p[3].y; // height from bottom to top_right
+    let x = center + Math.abs(baseX); // bottom_right.x which == top_right.x
+
+    // I'm making the proper angle to the vanishing point with congruent triangles
+    //    /|
+    //   /_|
+    //  /__|
+    p[1].y = window.innerHeight - (x - (p[1].x)) * y_low / x; // set bottom_left.y so it's proportional
+    p[2].y = window.innerHeight - (x - (p[1].x)) * y_high / x; // set top_left.y so it's proportional
+
+    this.points = p;
+  }
+
+  vanishToRight(p: Point[], center: number): void {
+    let baseX = 2 * window.innerWidth;
+    let baseY = window.innerHeight;
+
+    p[3].x = p[0].x; // set top_right.x = bottom_right.x
+    p[2].x = p[1].x; // set top_left.x = bottom_left.x
+
+    let y_low = window.innerHeight - p[1].y; // height from bottom to bottom_left
+    let y_high = window.innerHeight - p[2].y; // height from bottom to top_left
+    let x = center + Math.abs(baseX); // bottom_right.x which == top_right.x
+
+    // I'm making the proper angle to the vanishing point with congruent triangles
+    //  |\
+    //  |_\
+    //  |__\
+    p[0].y = window.innerHeight - (x - p[1].x) * y_low / x; // set bottom_right.y so it's proportional
+    p[3].y = window.innerHeight - (x - p[1].x) * y_high / x; // set top_right.y so it's proportional
+
+    this.points = p;
+  }
+
+  determinePoints(): Point[] {
+    let br: Point, bl: Point, tl: Point, tr: Point;
+
+    let right_most: Point = this.points[0]; // arbitrary starting value
+    let second_right_most: Point = this.points[0]; // arbitrary starting value
+
+    for (let p of this.points) {
+      // Determine two right most points
+      if (p.x > right_most.x) {
+        second_right_most = right_most;
+        right_most = p;
+      } else if (p.x > second_right_most.x) {
+        second_right_most = p;
+      }
+    }
+
+    // Determine top and bottom of rightmost points
+    if (right_most.y > second_right_most.y) {
+      br = right_most;
+      tr = second_right_most;
+    } else {
+      tr = right_most;
+      br = second_right_most;
+    }
+
+    let left_most: Point = tr; // arbitrary starting value
+    let second_left_most: Point = tr; // arbitrary starting value
+
+    for (let p of this.points) {
+      // Determine two right most points
+      if (p.x < left_most.x) {
+        second_left_most = left_most;
+        left_most = p;
+      } else if (p.x < second_left_most.x) {
+        second_left_most = p;
+      }
+    }
+
+    console.log(left_most, second_left_most);
+
+    // Determine top and bottom of rightmost points
+    if (left_most.y > second_left_most.y) {
+      bl = left_most;
+      tl = second_left_most;
+    } else {
+      tl = left_most;
+      bl = second_left_most;
+    }
+
+    return [br, bl, tl, tr];
   }
 }
 
-// Box is composed of three polygons and seven points
-class Box {
-  private left: any;
-  private right: any;
-  private top: any;
-  constructor(svg: any, cx: number, cy: number, scale: number) {
+let palette: Palette = new Palette();
 
-    // Small and Big are the differences that the point is offset by the scale
-    let small = (scale / 4);
-    let big = (scale / 2);
+let centerIsPlaced: boolean = false;
 
-    // Create the 7 points
-    // p1 is at the center and p2-p7 form a hexagon around the center
-    // I am not able to make an ascii visual unfortunately
-    let p1 = new Point(cx, cy);
-    let p2 = new Point(cx, cy - big);
-    let p3 = new Point(cx + big, cy - small);
-    let p4 = new Point(cx - big, cy - small);
-    let p5 = new Point(cx + big, cy + small);
-    let p6 = new Point(cx - big, cy + small);
-    let p7 = new Point(cx, cy + big);
 
-    // Polygons for the box
-    let left = new Polygon(p6, p1, p2, p4);
-    let right = new Polygon(p1, p5, p3, p2);
-    let top = new Polygon(p6, p7, p5, p1);
+// Controller handles all input and drawing of points, lines, and polygons
+class Controller {
 
-    // Draw them with SVG.js
-    this.left = svg.polygon(left.getPoints()).fill("#000");
-    this.right = svg.polygon(right.getPoints()).fill("#444");
-    this.top = svg.polygon(top.getPoints()).fill("#EEE");
+  private centerIsPlaced: boolean;
+  private centerLine: any;
+  private center: number;
+  private pointCount: number;
+  private shapes: Shape[];
+
+  constructor() {
+    this.centerIsPlaced = false;
+    this.centerLine = svg.rect(1, window.innerHeight).attr({ fill: palette.list[0] });
+    this.pointCount = 0;
+    this.shapes = [];
   }
-  changeColor(palette: string[]) {
-    this.left.fill(palette[0]);
-    this.right.fill(palette[1]);
-    this.top.fill(palette[2]);
+
+  handleClick(event: any): void {
+    if (!this.centerIsPlaced) {
+      this.centerIsPlaced = true;
+      this.center = this.centerLine.attr('x');
+    } else {
+      if (this.pointCount == 4) this.pointCount = 0;
+      this.handleShape(event);
+      this.pointCount++;
+    }
   }
+
+  handleMouseMove(event: any): void {
+    if (!this.centerIsPlaced) {
+      this.centerLine.attr('x', event.clientX);
+    } else {
+      let shape = this.shapes[this.shapes.length - 1];
+      if (shape && this.pointCount < 4) {
+        shape.renderWithPoint(event.clientX, event.clientY);
+      }
+    }
+  }
+
+  handleShape(event: any): void {
+    if (this.pointCount == 0) {
+      // Create new shape
+      this.shapes.push(new Shape(new Point(event.clientX, event.clientY)));
+    } else if (this.pointCount < 4) {
+      // Add point to existing shape
+      this.shapes[this.shapes.length - 1].addPoint(new Point(event.clientX, event.clientY));
+    }
+    // Shape is completed so fix the perspective
+    if (this.pointCount == 3) this.shapes[this.shapes.length - 1].fixPersective(this.center);
+  }
+
 }
 
-// Prompt user for column input
-let column_string: string = prompt("Enter number of columns\nClick once generated\nRange: [5, 40]\n", "20");
-let COLUMNS: number = parseInt(column_string, 10);
-// Input validation
-while (isNaN(COLUMNS) || (parseInt(column_string, 10) < 5 || parseInt(column_string, 10) > 40)) {
-  column_string = prompt("NOT IN RANGE\nEnter number of columns\nRange: [5, 40]\n", "20");
-  COLUMNS = parseInt(column_string, 10)
-}
+let controller: Controller = new Controller();
 
-let scale = window.innerWidth / COLUMNS;
-let boxes: Array<Box> = [];
-
-for (let i = 0; i < COLUMNS; i++) {
-  for (let j = 0; j < COLUMNS + 1; j++) {
-    // shift row every other column
-    let shift = (i % 2 == 0) ? 0 : (scale / 2);
-    boxes.push(new Box(svg, j * scale + shift, i * (scale - (scale  / 4)), scale));
-  }
-}
-
-// Finished Adding boxes
-document.getElementById('loading').remove();
-
-// Initialize color palette
-let palette = new Palette();
-
-// This adds an onclick function to the whole body
-// The function changes the color of the boxes
-document.getElementsByTagName("body")[0].onclick = function(){
-  palette.randomize();
-  for (let box of boxes) {
-    box.changeColor(palette.list);
-  }
-}
+// I assign the listeners like this so that I can use 'this' within my typescript class
+// If I assign the listerns directly, then 'this' within those functions will be #document
+document.onmousemove = function(event) {
+  controller.handleMouseMove(event);
+};
+document.getElementsByTagName("body")[0].onclick = function(event) {
+  controller.handleClick(event);
+};

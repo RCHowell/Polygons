@@ -100,11 +100,11 @@ while (isNaN(COLUMNS) || (parseInt(column_string, 10) < 5 || parseInt(column_str
     column_string = prompt("NOT IN RANGE\nEnter number of columns\nRange: [5, 40]\n", "20");
     COLUMNS = parseInt(column_string, 10);
 }
-// Scale is the width over (2 * columns) because the boxes extend in the +x and -x direction by 2 * scale
 var scale = window.innerWidth / COLUMNS;
 var boxes = [];
 for (var i = 0; i < COLUMNS; i++) {
     for (var j = 0; j < COLUMNS + 1; j++) {
+        // shift row every other column
         var shift = (i % 2 == 0) ? 0 : (scale / 2);
         boxes.push(new Box(svg, j * scale + shift, i * (scale - (scale / 4)), scale));
     }

@@ -6,24 +6,32 @@
         padding: 0px;
         margin: 0px;
         overflow: hidden;
-        background: #37474F;
+        background: #eee;
       }
-      #loading {
-        display: block;
-        text-align: center;
-        padding: 0px 0px 4px 0px;
-        margin: 200px auto;
-        width: 200px;
-        font-size: 16px;
-        color: #fff;
-        border-bottom: 2px solid #ffab00;
+      #instructions {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+      }
+      p {
+        margin: 0;
+        font-size: 0.6em;
+        padding-bottom: 4px;
+        line-height: 1.5em;
+        text-align: left;
+        color: #444;
         font-family: sans-serif;
-        pointer-events: none;
       }
     </style>
   </head>
   <body>
-    <p id="loading">. :   Loading   : .</p>
+    <div id="instructions">
+      <p>1. Click to place center of perspective.</p>
+      <p>2. After center is placed, click to create points.</p>
+      <p>3. Polygons are created after four points are placed.</p>
+      <p>4. The verticle is determined by the bottom right most point.</p>
+      <p>Tip: Avoid crossing the center line or making a convex shape.</p>
+    </div>
     <div id="drawing">
 
     </div>
