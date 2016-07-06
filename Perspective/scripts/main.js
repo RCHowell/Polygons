@@ -113,13 +113,13 @@ var Shape = (function () {
         p[2].x = p[1].x; // set top_left.x = bottom_left.x
         var y_low = window.innerHeight - p[0].y; // height from bottom to bottom_right
         var y_high = window.innerHeight - p[3].y; // height from bottom to top_right
-        var x = center + Math.abs(baseX); // bottom_right.x which == top_right.x
+        var x = p[0].x + Math.abs(baseX); // bottom_right.x which == top_right.x
         // I'm making the proper angle to the vanishing point with congruent triangles
         //    /|
         //   /_|
         //  /__|
         p[1].y = window.innerHeight - (x - (p[1].x)) * y_low / x; // set bottom_left.y so it's proportional
-        p[2].y = window.innerHeight - (x - (p[1].x)) * y_high / x; // set top_left.y so it's proportional
+        p[2].y = window.innerHeight - (x - (p[2].x)) * y_high / x; // set top_left.y so it's proportional
         this.points = p;
     };
     Shape.prototype.vanishToRight = function (p, center) {

@@ -144,7 +144,7 @@ class Shape {
     //   /_|
     //  /__|
     p[1].y = window.innerHeight - (x - (p[1].x)) * y_low / x; // set bottom_left.y so it's proportional
-    p[2].y = window.innerHeight - (x - (p[1].x)) * y_high / x; // set top_left.y so it's proportional
+    p[2].y = window.innerHeight - (x - (p[2].x)) * y_high / x; // set top_left.y so it's proportional
 
     this.points = p;
   }
