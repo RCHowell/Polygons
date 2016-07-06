@@ -1,7 +1,11 @@
 # Cubes
 Typescript and SVG experiment
 
-This project divides the browser window into hundreds of polygons that form the classic 3D Cube illusion
+This project divides the browser window into hundreds of polygons that form the classic 3D Cube illusion.
+
+Example:
+
+![Example Image](example.png "Generated Cubes")
 
 - You can download and open index.html to run as is.
 - If you would like to edit the typescript, then you will have to recompile it with 'tsc ./scripts/main.ts'
