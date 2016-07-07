@@ -1,6 +1,8 @@
 # Polygons
 Typescript and SVG experiments
 
+[Live Demo](http://rchowell.com/Polygons "Live Demo")
+
 Project to improve my typescript. These projects create polygons with SVG.js in all different ways.
 
 For each project:
