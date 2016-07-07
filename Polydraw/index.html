@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Polydraw | Polygon Experiment</title>
+    <meta name="keywords" content="Typescript, SVG, Javascript, Drawing">
+    <meta name="author" content="R. Conner Howell">
+    <meta charset="UTF-8">
+    <style>
+      body {
+        padding: 0px;
+        margin: 0px;
+        overflow: hidden;
+        background: #eee;
+      }
+      #header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: #fff;
+        font-family: sans-serif;
+        text-align: left;
+        line-height: 40px;
+        display: flex;
+      }
+      .heading {
+        display: inline-block;
+        margin: 0;
+        font-size: 1em;
+        color: #444;
+      }
+      .text {
+        display: inline;
+        margin: 0;
+        font-size: 0.6em;
+        color: #777;
+      }
+      .col {
+        position: absolute;
+        top: 0;
+        height: 40px;
+      }
+      .left {
+        padding-left: 20px;
+        left: 0;
+        width: 20%;
+        display: block;
+      }
+      .center {
+        left: 20%;
+        width: 60%;
+        display: block;
+        text-align: center;
+      }
+      .right {
+        padding-right: 20px;
+        right: 0;
+        width: 20%;
+        display: block;
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header">
+      <span class="col left heading">Polydraw</span>
+      <span class="col center text">Press 'space' to place last point. Press 'enter' to change color.</span>
+      <span class="col right text">R C Howell 2016</span>
+    </div>
+    <div id="drawing">
+    </div>
+    <script type="text/javascript" src="./scripts/svg.min.js"></script>
+    <script type="text/javascript" src="./scripts/main.js"></script>
+  </body>
+</html>
